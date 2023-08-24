@@ -5,7 +5,7 @@ The Copy Pose Tool copies a pose from an animated rig to a static rig in Maya. T
 
 https://github.com/Jechli/CopyAnimatedPose/assets/2565734/d2182d8b-9a85-4689-962f-97e530449e0b
 
-#HOW TO USE:
+<h1> HOW TO USE:</h1>
 
 * To quickly open up the UI for the tool for testing, import the file into Maya, select all of the code in the script editor, and press Ctrl+Enter.
 
@@ -19,7 +19,7 @@ https://github.com/Jechli/CopyAnimatedPose/assets/2565734/d2182d8b-9a85-4689-962
 
 If any rigs have been added / deleted during the time the tool has been opened, there is a 'Refresh Lists' button at the top for updating the rig lists accordingly.
 
-#IMPROVEMENTS AND EXTENSIONS
+<h1>IMPROVEMENTS AND EXTENSIONS</h1>
 
 * It is missing a check to see if the rigs are compatible to be copied and pasted between each other.*
 * Currently the copy and paste functions are done recursively, from the root joint to the tips of the rig without checking the naming. If one can assume that the naming of the joints will always be the same then it could be good to check the names too before copying over.*
