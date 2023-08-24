@@ -2,7 +2,6 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
-import pymel.core as pm
 
 """
 COPY ANIMATED RIG POSE TO STATIC RIG
@@ -21,7 +20,9 @@ class CopyPoseTool(QtWidgets.QDialog):
         self.setMinimumWidth(500)
         self.setWindowFlags(QtCore.Qt.Window)
         
-        self.copied_rig = []
+        self.copied_rig_joint_names = []
+        self.copied_rig_translate = []
+        self.copied_rig_rotate = []
         
         self.create_widgets()
         self.create_main_layout()
@@ -65,37 +66,68 @@ class CopyPoseTool(QtWidgets.QDialog):
         
     def create_main_layout(self):
         
-        # Reorganize the copy and paste selection lists on the main layout
         self.pose_section_layout = QtWidgets.QHBoxLayout()
         self.pose_section_layout.addLayout(self.copy_pose_layout)
         self.pose_section_layout.addLayout(self.paste_pose_layout)
         
-        # Adding sectional layouts to main layout
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.addLayout(self.pose_section_layout)
         
-        
+
     def create_connections(self):
-        self.copy_pose_list.itemClicked.connect(self.copy_rig_selected)
-        self.paste_pose_list.itemClicked.connect(self.paste_rig_selected)
+        self.copy_pose_list.itemClicked.connect(self.copy_rig_item_selected)
+        self.paste_pose_list.itemClicked.connect(self.paste_rig_item_selected)
         self.copy_button.clicked.connect(self.copy_pose)
         self.paste_button.clicked.connect(self.paste_pose)
         
+
     def update_lists(self):
-        pass
+        list_of_rigs = [jnt for jnt in cmds.ls(type='joint') if not cmds.listRelatives(jnt, parent=True,type='joint')]
+        self.copy_pose_list.clear()
+        self.paste_pose_list.clear()
+        for rig in list_of_rigs:
+            self.copy_pose_list.addItem(rig)
+            self.paste_pose_list.addItem(rig)
+        
         
         
     """
     Functionality
     """
+    
+    def add_joints_to_copy_list(self, root):
+        
+        root_translate = cmds.getAttr(root+'.translate')
+        root_rotate = cmds.getAttr(root+'.rotate')
+        
+        self.copied_rig_joint_names.append(root)
+        self.copied_rig_translate.append(root_translate)
+        self.copied_rig_rotate.append(root_rotate)
+        
+        children = cmds.listConnections(root, type="joint", source=False)
+        
+        if (children):
+            for child in children:
+                self.add_joints_to_copy_list(child)
+                
 
     # Save the rig joint information
-    def copy_rig_selected(self):
-        self.copied_rig.clear()
-        # Grey out any static rigs that don't match joint numbers
+    def copy_rig_item_selected(self):   
+        self.copied_rig_joint_names.clear()
+        self.copied_rig_translate.clear()
+        self.copied_rig_rotate.clear()
+        
+        root = self.copy_pose_list.currentItem().text()
+        self.add_joints_to_copy_list(root)
+        
+        print(self.copied_rig_joint_names)
+        print(self.copied_rig_translate)
+        print(self.copied_rig_rotate)
+        
+
     
     # Paste copied rig joint info to selected static rig    
-    def paste_rig_selected(self):
+    def paste_rig_item_selected(self):
         pass
         
     
