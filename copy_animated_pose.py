@@ -20,10 +20,12 @@ class CopyPoseTool(QtWidgets.QDialog):
         self.setMinimumWidth(500)
         self.setWindowFlags(QtCore.Qt.Window)
         
+        # Lists for storing pose information after pressing Copy Pose button
         self.copied_rig_joint_names = []
         self.copied_rig_translate = []
         self.copied_rig_rotate = []
         
+        # UI layout
         self.create_widgets()
         self.create_main_layout()
         self.create_connections()
@@ -32,15 +34,17 @@ class CopyPoseTool(QtWidgets.QDialog):
         
     def create_widgets(self):
         
-        # Section for selecting an animated rig to copy from
+        # Button to refresh lists
+        self.refresh_button = QtWidgets.QPushButton("Refresh Lists")
         
+        # Section for selecting an animated rig to copy from
         self.copy_from_label = QtWidgets.QLabel("Copy Pose From")
         self.copy_from_label.setStyleSheet("padding:5px; font-weight:bold;")
         
         self.copy_pose_list = QtWidgets.QListWidget()
         self.copy_pose_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         
-        self.copy_button = QtWidgets.QPushButton("Copy")
+        self.copy_button = QtWidgets.QPushButton("Copy Pose")
         
         self.copy_pose_layout = QtWidgets.QVBoxLayout()
         self.copy_pose_layout.addWidget(self.copy_from_label)
@@ -48,14 +52,13 @@ class CopyPoseTool(QtWidgets.QDialog):
         self.copy_pose_layout.addWidget(self.copy_button)
         
         # Section for selecting a static rig to paste to
-        
         self.paste_to_label = QtWidgets.QLabel("Paste Pose To")
         self.paste_to_label.setStyleSheet("padding:5px; font-weight:bold;")
         
         self.paste_pose_list = QtWidgets.QListWidget()
         self.paste_pose_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         
-        self.paste_button = QtWidgets.QPushButton("Paste")
+        self.paste_button = QtWidgets.QPushButton("Paste Pose")
         
         self.paste_pose_layout = QtWidgets.QVBoxLayout()
         self.paste_pose_layout.addWidget(self.paste_to_label)
@@ -70,11 +73,13 @@ class CopyPoseTool(QtWidgets.QDialog):
         self.pose_section_layout.addLayout(self.paste_pose_layout)
         
         self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.main_layout.addWidget(self.refresh_button)
         self.main_layout.addLayout(self.pose_section_layout)
         
 
     def create_connections(self):
         
+        self.refresh_button.clicked.connect(self.update_lists)
         self.copy_pose_list.itemClicked.connect(self.copy_rig_item_selected)
         self.paste_pose_list.itemClicked.connect(self.paste_rig_item_selected)
         self.copy_button.clicked.connect(self.copy_pose)
@@ -89,11 +94,7 @@ class CopyPoseTool(QtWidgets.QDialog):
         for rig in list_of_rigs:
             self.copy_pose_list.addItem(rig)
             self.paste_pose_list.addItem(rig)
-        
-        
-    """
-    Functionality
-    """
+     
     
     def copy_rig_item_selected(self):   
         selected_rig = self.copy_pose_list.currentItem().text()
@@ -159,12 +160,14 @@ class CopyPoseTool(QtWidgets.QDialog):
         rotate_Y = rotate_tuple[1]
         rotate_Z = rotate_tuple[2]
         
-        cmds.setAttr(root+'.translateX', translate_X)
-        cmds.setAttr(root+'.translateY', translate_Y)
-        cmds.setAttr(root+'.translateZ', translate_Z)
-        cmds.setAttr(root+'.rotateX', rotate_X)
-        cmds.setAttr(root+'.rotateY', rotate_Y)
-        cmds.setAttr(root+'.rotateZ', rotate_Z)
+        cmds.select(root)
+        
+        cmds.setKeyframe(value=translate_X, attribute='translateX')
+        cmds.setKeyframe(value=translate_Y, attribute='translateY')
+        cmds.setKeyframe(value=translate_Z, attribute='translateZ')
+        cmds.setKeyframe(value=rotate_X, attribute='rotateX')
+        cmds.setKeyframe(value=rotate_Y, attribute='rotateY')
+        cmds.setKeyframe(value=rotate_Z, attribute='rotateZ')
         
         new_root_index = root_index + 1
         
